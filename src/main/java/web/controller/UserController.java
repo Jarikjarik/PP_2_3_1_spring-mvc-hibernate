@@ -1,12 +1,13 @@
-package controller;
+package web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import model.User;
-import service.UserService;
+import web.model.User;
+import web.service.UserService;
+
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,6 @@ public class UserController {
         model.addAttribute("users", users);
         return "users";
     }
-
 
     @GetMapping("/new")
     public String createUserForm(Model model) {
@@ -54,11 +54,6 @@ public class UserController {
         if (foundUser.isPresent()) {
             model.addAttribute("user", foundUser.get());
             return "edituser";
-        }
-
-        if (foundUser.isPresent()) {
-            model.addAttribute("user", foundUser.get());
-            return "edituser";
         } else {
             model.addAttribute("errorMessage", "Пользователь с таким ID не найден");
             return "error";
@@ -77,8 +72,14 @@ public class UserController {
     }
 
     @PostMapping("/delete")
-    public String deleteUser(@RequestParam("id") Long id) {
-        userService.deleteUser(id);
+    public String deleteUser(@RequestParam("id") Long id, Model model) {
+        Optional<User> user = userService.findById(id);
+        if (user.isPresent()) {
+            userService.deleteUser(id);
+        } else {
+            model.addAttribute("errorMessage", "Пользователь с таким ID не найден");
+            return "error";
+        }
         return "redirect:/users";
     }
 }
